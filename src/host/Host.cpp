@@ -13,8 +13,8 @@ Host::Host()
 #if defined(ESP32)
 
 	WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) {
-		Serial << endl
-			   << "Station connected, IP: " << WiFi.localIP() << endl;
+		debug << endl
+			  << "Station connected, IP: " << WiFi.localIP() << endl;
 		stateSet(BEGIN_UPDATE);
 	},
 				 WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
@@ -22,14 +22,14 @@ Host::Host()
 #elif defined(ESP8266)
 
 	gotIpEventHandler = WiFi.onStationModeGotIP([this](const WiFiEventStationModeGotIP &event) {
-		Serial << endl
-			   << "Station connected, IP: " << WiFi.localIP() << endl;
+		debug << endl
+			  << "Station connected, IP: " << WiFi.localIP() << endl;
 		stateSet(BEGIN_UPDATE);
 	});
 
 	disconnectedHandler = WiFi.onStationModeDisconnected([this](const WiFiEventStationModeDisconnected &event) {
-		Serial << endl
-			   << "Station disconnected" << endl;
+		debug << endl
+			  << "Station disconnected" << endl;
 		//stateSet(BEGIN_WEB_SERVER);
 	});
 

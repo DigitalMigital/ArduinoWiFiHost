@@ -2,6 +2,7 @@
 #define sergomor_Storageable_h
 
 #include "Serializable.h"
+#include "Streambuff.h"
 #include <FS.h>
 
 namespace sergomor

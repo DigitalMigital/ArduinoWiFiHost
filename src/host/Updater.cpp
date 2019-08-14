@@ -25,14 +25,14 @@ void Updater::updateWebServerFiles()
 	if (!config.host.length())
 		config.host = githubusercontent_host;
 
-	Serial << "Update enable: " << config.enable << endl;
+	debug << "Update enable: " << config.enable << endl;
 
 	if (!config.enable)
 		return;
 
 	if (!SPIFFS.begin())
 	{
-		Serial << "SPIFFS Mount Failed" << endl;
+		debug << "SPIFFS Mount Failed" << endl;
 		return;
 	}
 
@@ -48,22 +48,22 @@ void Updater::updateWebServerFiles()
 	{
 		http.begin(config.host + webserver_path + web_files[i], githubusercontent_fingerprint);
 		httpCode = http.GET();
-		Serial << "read: " << config.host + webserver_path + web_files[i] << " with code: " << httpCode << endl;
+		debug << "read: " << config.host + webserver_path + web_files[i] << " with code: " << httpCode << endl;
 		if (httpCode > 0 && httpCode < 400)
 		{
 			stream = http.getStreamPtr();
 			file = SPIFFS.open(path + web_files[i], "w");
-			Serial << "open file: " << path + web_files[i] << " res:" << (bool)file << endl;
+			debug << "open file: " << path + web_files[i] << " res:" << (bool)file << endl;
 			if ((bool)file)
 			{
 				len = http.getSize();
-				printf("write %s to fs %lu bytes\n", web_files[i], len);
+				debug << "write " << web_files[i] << " to fs " << len << " bytes" << endl;
 				while (http.connected() && (len > 0))
 				{
 					len = stream->readBytes(buf, 127);
 					file.write(buf, len);
 				}
-				Serial << endl;
+				debug << endl;
 				file.close();
 			}
 			http.end();

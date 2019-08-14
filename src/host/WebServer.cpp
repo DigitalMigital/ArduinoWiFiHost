@@ -23,7 +23,7 @@ void WebServer::begin()
 		setup();
 		server->begin();
 		stateSet(STARTED);
-		Serial << "Start WebServer at " << WiFi.localIP() << endl;
+		debug << "Start WebServer at " << WiFi.localIP() << endl;
 		server_started = true;
 	}
 }
@@ -41,7 +41,7 @@ void WebServer::setup()
 		if (!dns_started)
 		{
 			dnsServer.start(53, "*", WiFi.softAPIP());
-			Serial << "start DNS Server" << endl;
+			debug << "start DNS Server" << endl;
 			dns_started = true;
 		}
 		//server->addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
@@ -68,7 +68,6 @@ void WebServer::setup()
 	server->on("/wifi", HTTP_POST, [](AsyncWebServerRequest *request) {
 		WifiConfig config;
 		AsyncWebParameter *p;
-		String anchor("save-error");
 		int params = request->params();
 
 		for (int i = 0; i < params; i++)
@@ -94,18 +93,17 @@ void WebServer::setup()
 
 		if (config.ssid.length() > 0 && config.password.length() > 0 && config.save())
 		{
-			request->redirect("/#restart");
+			request->send(200, "text/plain", "WiFi Config Saved. Restarting board...");
 			delay(500);
 			ESP.restart();
 		}
 
-		request->redirect("/#" + anchor);
+		request->send(200, "text/plain", "WiFi Config Not Saved.");
 	});
 
 	server->on("/ota", HTTP_POST, [](AsyncWebServerRequest *request) {
 		UpdaterConfig config;
 		AsyncWebParameter *p;
-		String anchor("save-error");
 		int params = request->params();
 
 		for (int i = 0; i < params; i++)
@@ -118,14 +116,11 @@ void WebServer::setup()
 				config.enable = p->value().toInt();
 		}
 
-		Serial << "enable remote: " << config.enable << endl;
+		debug << "enable remote: " << config.enable << endl;
 
-		if (config.save())
-		{
-			anchor = "save-ok";
-		}
+		config.save();
 
-		request->redirect("/#" + anchor);
+		request->send(200, "text/plain", "OTA Config Saved.");
 	});
 }
 

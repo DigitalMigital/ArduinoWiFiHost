@@ -14,24 +14,24 @@ void WifiMonitor::tick()
 
 	if (status != _status && _status != WL_CONNECTED)
 	{
-		Serial << "connect to wifi" << endl;
+		debug << "connect to wifi" << endl;
 	}
 
 	if (_status != WL_CONNECTED && times_to_connect > times++)
 	{
-		Serial << ".";
+		debug << ".";
 	}
 	else if (times_to_connect < times)
 	{
-		Serial << endl
-			   << "connection failed" << endl;
+		debug << endl
+			  << "connection failed" << endl;
 		times = 0;
 	}
 
 	if (_status == WL_CONNECTED && status != _status)
 	{
-		Serial << "connected to " << WiFi.gatewayIP() << " with " << WiFi.localIP()
-			   << endl;
+		debug << "connected to " << WiFi.gatewayIP() << " with " << WiFi.localIP()
+			  << endl;
 	}
 
 	status = _status;
