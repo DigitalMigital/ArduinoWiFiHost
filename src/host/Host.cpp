@@ -46,17 +46,17 @@ void Host::begin()
 	WiFi.mode(WIFI_AP_STA);
 
 	String ssid("eps8266-" + ESP.getChipId());
-	if (config.ap_ssid.length())
-		ssid = config.ap_ssid;
+	//if (config.ap_ssid.length())
+	//	ssid = config.ap_ssid;
 	Serial << "AP SSID: " << ssid << endl;
 
 	IPAddress netMsk(255, 255, 255, 0);
 	IPAddress apIP(192, 168, 72, 1);
-	if (config.ap_ipaddress.length())
-		apIP.fromString(config.ap_ipaddress);
+	//if (config.ap_ipaddress.length())
+	//	apIP.fromString(config.ap_ipaddress);
 
 	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(ssid.c_str(), config.ap_password.length() ? config.ap_password.c_str() : NULL);
+	WiFi.softAP(ssid.c_str());
 	delay(500);
 	Serial << "AP IP: " << WiFi.softAPIP() << endl;
 

@@ -13,24 +13,24 @@ struct WifiConfig : public Storageable<WifiConfig, WifiConfig_filename>
 	String ssid;
 	String password;
 	// SoftAp mode config
-	String ap_ipaddress;
-	String ap_ssid;
-	String ap_password;
+	//String ap_ipaddress;
+	//String ap_ssid;
+	//String ap_password;
 
 	// Serializable
-	virtual size_t length() {
-		return ssid.length() + password.length()
-		+ ap_ssid.length() +  ap_password.length() + ap_ipaddress.length() + 5;
+	virtual size_t length()
+	{
+		return ssid.length() + password.length() + 2;
 	}
 
 	virtual OStreambuff &output(OStreambuff &os)
 	{
-		return os << ssid << password << ap_ipaddress << ap_ssid << ap_password;
+		return os << ssid << password;
 	}
 
 	virtual IStreambuff &input(IStreambuff &is)
 	{
-		return is >> ssid >> password >> ap_ipaddress >> ap_ssid >> ap_password;
+		return is >> ssid >> password;
 	}
 };
 }; // namespace sergomor
