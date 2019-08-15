@@ -2,12 +2,13 @@
 #define sergomor_WifiConfig_h
 
 #include "../utils/Storageable.h"
+#include "../utils/Singleton.h"
 
 namespace sergomor
 {
 
 constexpr char WifiConfig_filename[] = "/wifi.cfg";
-struct WifiConfig : public Storageable<WifiConfig, WifiConfig_filename>
+struct WifiConfig : public Storageable<WifiConfig, WifiConfig_filename>, public Singleton<WifiConfig>
 {
 
 	String ssid;

@@ -38,17 +38,25 @@ Host::Host()
 	stateSet(OFF);
 }
 
+void Host::setup()
+{
+	static WebServer w;
+	webServerSet(&w);
+}
+
 void Host::begin()
 {
-	WifiConfig config;
+	setup();
+	WifiConfig &config = WifiConfig::instance();
 	config.load();
 
 	WiFi.mode(WIFI_AP_STA);
 
-	String ssid("eps8266-" + ESP.getChipId());
+	String ssid("eps8266-");
+	ssid += ESP.getChipId();
 	//if (config.ap_ssid.length())
 	//	ssid = config.ap_ssid;
-	Serial << "AP SSID: " << ssid << endl;
+	debug << "AP SSID: " << ssid << endl;
 
 	IPAddress netMsk(255, 255, 255, 0);
 	IPAddress apIP(192, 168, 72, 1);
@@ -58,7 +66,7 @@ void Host::begin()
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(ssid.c_str());
 	delay(500);
-	Serial << "AP IP: " << WiFi.softAPIP() << endl;
+	debug << "AP IP: " << WiFi.softAPIP() << endl;
 
 	if (!config.ssid.length())
 	{
@@ -66,6 +74,7 @@ void Host::begin()
 		config.password = "nopassword";
 	}
 	WiFi.begin(config.ssid.c_str(), config.password.c_str());
+	debug << "begin WiFi: " << config.ssid << endl;
 }
 
 void Host::tick()

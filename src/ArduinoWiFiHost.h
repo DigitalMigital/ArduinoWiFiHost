@@ -1,9 +1,10 @@
-#ifndef ArduinoHost_h
-#define ArduinoHost_h
+#ifndef ArduinoWiFiHost_h
+#define ArduinoWiFiHost_h
 
 #include "utils/stream_op.h"
 #include "utils/Publisher.h"
 #include "utils/Subscriber.h"
+#include "utils/Singleton.h"
 #include "utils/Storageable.h"
 #include "host/NTPClock.h"
 #include "host/WebServer.h"

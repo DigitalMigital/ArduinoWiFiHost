@@ -4,6 +4,7 @@
 #include <FS.h>
 #include "../utils/stream_op.h"
 #include "UpdaterConfig.h"
+#include <ArduinoJson.h>
 
 namespace sergomor
 {
@@ -19,7 +20,7 @@ void Updater::begin()
 
 void Updater::updateWebServerFiles()
 {
-	UpdaterConfig config;
+	UpdaterConfig &config = UpdaterConfig::instance();
 	config.load();
 
 	if (!config.host.length())
@@ -43,21 +44,54 @@ void Updater::updateWebServerFiles()
 	uint8_t buf[128];
 	size_t len;
 	String path("/");
+	JsonArray files;
+	size_t num_files = 0;
+	int got_files = 0;
+	String webfile;
 
-	for (int i = 0; i < NUM_WEB_FILES; i++)
+	debug << "web files version: " << config.webfiles_version << endl;
+
+	// load manifest
+	http.begin(config.host + webserver_path + "manifest.json", githubusercontent_fingerprint);
+	httpCode = http.GET();
+	if (httpCode > 0 && httpCode < 400)
 	{
-		http.begin(config.host + webserver_path + web_files[i], githubusercontent_fingerprint);
+		stream = http.getStreamPtr();
+		len = http.getSize();
+		stream->readBytes(buf, len);
+
+		buf[len + 1] = NULL;
+		StaticJsonDocument<100> doc;
+		if (!deserializeJson(doc, buf))
+		{
+			debug << "manifest version: " << (const char *)doc["version"] << endl;
+			if (strlen((const char *)doc["version"]) && config.webfiles_version != (const char *)doc["version"])
+			{
+				files = doc["files"];
+				num_files = files.size();
+			}
+		}
+	}
+	http.end();
+
+	if (!num_files)
+		return;
+
+	for (int i = 0; i < num_files; i++)
+	{
+		webfile = String((const char *)files[i]);
+		http.begin(config.host + webserver_path + webfile, githubusercontent_fingerprint);
 		httpCode = http.GET();
-		debug << "read: " << config.host + webserver_path + web_files[i] << " with code: " << httpCode << endl;
+		debug << "read: " << config.host + webserver_path + webfile << " with code: " << httpCode << endl;
 		if (httpCode > 0 && httpCode < 400)
 		{
 			stream = http.getStreamPtr();
-			file = SPIFFS.open(path + web_files[i], "w");
-			debug << "open file: " << path + web_files[i] << " res:" << (bool)file << endl;
+			file = SPIFFS.open(path + webfile, "w");
+			debug << "open file: " << path + webfile << " res:" << (bool)file << endl;
 			if ((bool)file)
 			{
 				len = http.getSize();
-				debug << "write " << web_files[i] << " to fs " << len << " bytes" << endl;
+				debug << "write " << webfile << " to fs " << len << " bytes" << endl;
 				while (http.connected() && (len > 0))
 				{
 					len = stream->readBytes(buf, 127);
@@ -65,9 +99,17 @@ void Updater::updateWebServerFiles()
 				}
 				debug << endl;
 				file.close();
+				got_files++;
 			}
-			http.end();
 		}
+		http.end();
+	}
+
+	if (got_files == num_files)
+	{
+		config.version = doc["version"];
+		//config.save();
+		devug <<
 	}
 }
 } // namespace sergomor

@@ -12,16 +12,6 @@ inline Print &operator<<(Print &obj, T arg)
 	return obj;
 }
 
-struct DebugStream
-{
-	template <typename T>
-	Print &operator<<(const T &arg) const
-	{
-		return Serial << "debug " << arg;
-	}
-};
-
-// This type also provides a stream-like interface but does nothing
 struct NoStream
 {
 	template <class T>
@@ -31,8 +21,10 @@ struct NoStream
 	}
 };
 
+#define DEBUG
+
 #ifdef DEBUG
-extern DebugStream debug;
+#define debug Serial
 #else
 extern NoStream debug;
 #endif

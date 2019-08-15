@@ -66,7 +66,7 @@ void WebServer::setup()
 	});
 
 	server->on("/wifi", HTTP_POST, [](AsyncWebServerRequest *request) {
-		WifiConfig config;
+		WifiConfig &config = WifiConfig::instance();
 		AsyncWebParameter *p;
 		int params = request->params();
 
@@ -82,7 +82,7 @@ void WebServer::setup()
 
 		if (!SPIFFS.exists("/index.html.gz"))
 		{
-			UpdaterConfig cfg;
+			UpdaterConfig &cfg = UpdaterConfig::instance();
 			cfg.load();
 			if (!cfg.enable)
 			{
@@ -102,9 +102,11 @@ void WebServer::setup()
 	});
 
 	server->on("/ota", HTTP_POST, [](AsyncWebServerRequest *request) {
-		UpdaterConfig config;
+		UpdaterConfig &cfg = UpdaterConfig::instance();
 		AsyncWebParameter *p;
 		int params = request->params();
+
+		cfg.enable = 0;
 
 		for (int i = 0; i < params; i++)
 		{
@@ -113,12 +115,12 @@ void WebServer::setup()
 			//if (p->name() == "host") config.host = p->value();
 			//if (p->name() == "fingerprint") config.fingerprint = p->value();
 			if (p->name() == "enable")
-				config.enable = p->value().toInt();
+				cfg.enable = p->value().toInt();
 		}
 
-		debug << "enable remote: " << config.enable << endl;
+		debug << "enable remote: " << cfg.enable << endl;
 
-		config.save();
+		cfg.save();
 
 		request->send(200, "text/plain", "OTA Config Saved.");
 	});

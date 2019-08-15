@@ -1,3 +1,5 @@
+#ifndef sergomor_Singleton_h
+#define sergomor_Singleton_h
 
 namespace sergomor
 {
@@ -22,3 +24,4 @@ T &Singleton<T>::instance()
 	return instance;
 };
 }; // namespace sergomor
+#endif

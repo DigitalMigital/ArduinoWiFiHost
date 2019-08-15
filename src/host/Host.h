@@ -22,6 +22,7 @@ class Host : public Stateable, public Tickable
 public:
 	Host();
 
+	virtual void setup();
 	virtual void tick();
 	virtual void stateSet(state_t new_state)
 	{
@@ -33,7 +34,6 @@ public:
 
 	void begin();
 	const uint64_t id() { return ESP.getChipId(); }
-	void setup();
 
 	enum : state_t
 	{
