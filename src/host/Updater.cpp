@@ -41,13 +41,13 @@ void Updater::updateWebServerFiles()
 	HTTPClient http;
 	File file;
 	int httpCode;
-	uint8_t buf[128];
+	char buf[128];
 	size_t len;
 	String path("/");
 	JsonArray files;
 	size_t num_files = 0;
 	int got_files = 0;
-	String webfile;
+	DynamicJsonDocument doc(512);
 
 	debug << "web files version: " << config.webfiles_version << endl;
 
@@ -61,7 +61,6 @@ void Updater::updateWebServerFiles()
 		stream->readBytes(buf, len);
 
 		buf[len + 1] = NULL;
-		StaticJsonDocument<100> doc;
 		if (!deserializeJson(doc, buf))
 		{
 			debug << "manifest version: " << (const char *)doc["version"] << endl;
@@ -69,6 +68,7 @@ void Updater::updateWebServerFiles()
 			{
 				files = doc["files"];
 				num_files = files.size();
+				config.webfiles_version = (const char *)doc["version"];
 			}
 		}
 	}
@@ -79,23 +79,23 @@ void Updater::updateWebServerFiles()
 
 	for (int i = 0; i < num_files; i++)
 	{
-		webfile = String((const char *)files[i]);
-		http.begin(config.host + webserver_path + webfile, githubusercontent_fingerprint);
+		strcpy(buf, (const char *)files[i]);
+		http.begin(config.host + webserver_path + buf, githubusercontent_fingerprint);
 		httpCode = http.GET();
-		debug << "read: " << config.host + webserver_path + webfile << " with code: " << httpCode << endl;
+		debug << "read: " << config.host + webserver_path + buf << " with code: " << httpCode << endl;
 		if (httpCode > 0 && httpCode < 400)
 		{
 			stream = http.getStreamPtr();
-			file = SPIFFS.open(path + webfile, "w");
-			debug << "open file: " << path + webfile << " res:" << (bool)file << endl;
+			file = SPIFFS.open(path + buf, "w");
+			debug << "open file: " << path + buf << " res:" << (bool)file << endl;
 			if ((bool)file)
 			{
 				len = http.getSize();
-				debug << "write " << webfile << " to fs " << len << " bytes" << endl;
+				debug << "write " << buf << " to fs " << len << " bytes" << endl;
 				while (http.connected() && (len > 0))
 				{
-					len = stream->readBytes(buf, 127);
-					file.write(buf, len);
+					len = stream->readBytes(buf, 32);
+					file.write((const uint8_t *)buf, len);
 				}
 				debug << endl;
 				file.close();
@@ -107,9 +107,8 @@ void Updater::updateWebServerFiles()
 
 	if (got_files == num_files)
 	{
-		config.version = doc["version"];
-		//config.save();
-		devug <<
+		debug << "save version: " << config.webfiles_version << endl;
+		config.save();
 	}
 }
 } // namespace sergomor
