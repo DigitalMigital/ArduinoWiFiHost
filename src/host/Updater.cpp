@@ -1,6 +1,13 @@
 #include "Updater.h"
-#include <ESP8266HTTPClient.h>
+
+#if defined(ESP32)
+#include <WiFi.h>
+#include <HTTPClient.h>
+#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#endif
+
 #include <FS.h>
 #include "../utils/stream_op.h"
 #include "UpdaterConfig.h"

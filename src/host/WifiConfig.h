@@ -18,6 +18,12 @@ struct WifiConfig : public Storageable<WifiConfig, WifiConfig_filename>, public 
 	//String ap_ssid;
 	//String ap_password;
 
+	WifiConfig()
+	{
+		ssid = "";
+		password = "";
+	}
+
 	// Serializable
 	virtual size_t length()
 	{

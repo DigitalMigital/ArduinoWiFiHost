@@ -52,10 +52,10 @@ void Host::begin()
 
 	WiFi.mode(WIFI_AP_STA);
 
-	String ssid("eps8266-");
-	ssid += ESP.getChipId();
-	//if (config.ap_ssid.length())
-	//	ssid = config.ap_ssid;
+	String ssid("esp-111");
+
+	// ssid += id();
+
 	debug << "AP SSID: " << ssid << endl;
 
 	IPAddress netMsk(255, 255, 255, 0);
@@ -68,12 +68,15 @@ void Host::begin()
 	delay(500);
 	debug << "AP IP: " << WiFi.softAPIP() << endl;
 
+	debug << "config ssid length: " << config.ssid.length() << endl;
+
 	if (!config.ssid.length())
 	{
 		config.ssid = "badseed";
 		config.password = "nopassword";
 	}
 	WiFi.begin(config.ssid.c_str(), config.password.c_str());
+	//WiFi.begin("velagrom", "hnszj026");
 	debug << "begin WiFi: " << config.ssid << endl;
 }
 
@@ -84,13 +87,14 @@ void Host::tick()
 	//Serial << WiFi.status() << endl;
 
 	if (WiFi.status() == WL_DISCONNECTED) // WL_CONNECT_FAILED
-		webserver->begin();
+		if (webserver != nullptr)
+			webserver->begin();
 
 	switch (stateGet())
 	{
 
 	case BEGIN_UPDATE:
-		Updater::begin();
+		//Updater::begin();
 		if (webserver != nullptr)
 			stateSet(BEGIN_WEB_SERVER);
 		break;

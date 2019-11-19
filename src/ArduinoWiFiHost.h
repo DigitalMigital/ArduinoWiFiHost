@@ -1,5 +1,4 @@
-#ifndef ArduinoWiFiHost_h
-#define ArduinoWiFiHost_h
+#pragma once
 
 #include "utils/stream_op.h"
 #include "utils/Publisher.h"
@@ -9,5 +8,3 @@
 #include "host/NTPClock.h"
 #include "host/WebServer.h"
 #include "host/Host.h"
-
-#endif

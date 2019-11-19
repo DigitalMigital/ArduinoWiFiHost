@@ -33,7 +33,14 @@ public:
 	void webServerSet(WebServer *server) { webserver = server; }
 
 	void begin();
-	const uint64_t id() { return ESP.getChipId(); }
+	const uint32_t id()
+	{
+#if defined(ESP32)
+		return 111;
+#elif defined(ESP8266)
+		return ESP.getChipId();
+#endif
+	}
 
 	enum : state_t
 	{

@@ -4,6 +4,10 @@
 #include "Serializable.h"
 #include <FS.h>
 
+#if defined(ESP32)
+#include <SPIFFS.h>
+#endif
+
 namespace sergomor
 {
 
