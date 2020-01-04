@@ -3,6 +3,7 @@
 #include "../utils/stream_op.h"
 #include "NTPClock.h"
 #include "WifiConfig.h"
+#include "WebServer.h"
 
 namespace sergomor
 {
@@ -15,7 +16,6 @@ Host::Host()
 	WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) {
 		debug << endl
 			  << "Station connected, IP: " << WiFi.localIP() << endl;
-		stateSet(BEGIN_UPDATE);
 	},
 				 WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
 
@@ -24,51 +24,42 @@ Host::Host()
 	gotIpEventHandler = WiFi.onStationModeGotIP([this](const WiFiEventStationModeGotIP &event) {
 		debug << endl
 			  << "Station connected, IP: " << WiFi.localIP() << endl;
-		stateSet(BEGIN_UPDATE);
+		this->onConnect();
 	});
 
 	disconnectedHandler = WiFi.onStationModeDisconnected([this](const WiFiEventStationModeDisconnected &event) {
 		debug << endl
-			  << "Station disconnected" << endl;
-		//stateSet(BEGIN_WEB_SERVER);
+			  << "Station disconnected" << " " << disconnect_count << endl;
+
+		if (--disconnect_count == 0) {
+			WiFi.disconnect();
+			// setup AP mode
+			acessPoint();
+		}
 	});
 
 #endif
 
-	stateSet(OFF);
 }
 
-void Host::setup()
+void Host::acessPoint()
 {
-	static WebServer w;
-	webServerSet(&w);
+	static WebServer s;
+	WiFi.mode(WIFI_AP);
+	IPAddress netMsk(255, 255, 255, 0);
+	IPAddress apIP(192, 168, 72, 1);
+	WiFi.softAPConfig(apIP, apIP, netMsk);
+	WiFi.softAP("ESP-000");
+	delay(500);
+	s.begin();
 }
 
 void Host::begin()
 {
-	setup();
 	WifiConfig &config = WifiConfig::instance();
 	config.load();
 
-	WiFi.mode(WIFI_AP_STA);
-
-	String ssid("esp-111");
-
-	// ssid += id();
-
-	debug << "AP SSID: " << ssid << endl;
-
-	IPAddress netMsk(255, 255, 255, 0);
-	IPAddress apIP(192, 168, 72, 1);
-	//if (config.ap_ipaddress.length())
-	//	apIP.fromString(config.ap_ipaddress);
-
-	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(ssid.c_str());
-	delay(500);
-	debug << "AP IP: " << WiFi.softAPIP() << endl;
-
-	debug << "config ssid length: " << config.ssid.length() << endl;
+	WiFi.mode(WIFI_STA);
 
 	if (!config.ssid.length())
 	{
@@ -76,33 +67,7 @@ void Host::begin()
 		config.password = "nopassword";
 	}
 	WiFi.begin(config.ssid.c_str(), config.password.c_str());
-	//WiFi.begin("velagrom", "hnszj026");
 	debug << "begin WiFi: " << config.ssid << endl;
 }
 
-void Host::tick()
-{
-	wifi_monitor.tick();
-
-	//Serial << WiFi.status() << endl;
-
-	if (WiFi.status() == WL_DISCONNECTED) // WL_CONNECT_FAILED
-		if (webserver != nullptr)
-			webserver->begin();
-
-	switch (stateGet())
-	{
-
-	case BEGIN_UPDATE:
-		//Updater::begin();
-		if (webserver != nullptr)
-			stateSet(BEGIN_WEB_SERVER);
-		break;
-
-	case BEGIN_WEB_SERVER:
-		webserver->begin();
-		stateSet(READY);
-		break;
-	}
-}
 } // namespace sergomor

@@ -17,20 +17,10 @@
 namespace sergomor
 {
 
-class Host : public Stateable, public Tickable
+class Host
 {
 public:
 	Host();
-
-	virtual void setup();
-	virtual void tick();
-	virtual void stateSet(state_t new_state)
-	{
-		Stateable::stateSet(new_state);
-		onState(stateGet());
-	}
-	virtual void onState(state_t){};
-	void webServerSet(WebServer *server) { webserver = server; }
 
 	void begin();
 	const uint32_t id()
@@ -42,22 +32,12 @@ public:
 #endif
 	}
 
-	enum : state_t
-	{
-		OFF,
-		ON,
-		BEGIN_UPDATE,
-		BEGIN_WEB_SERVER,
-		READY,
-
-		LAST // for child states
-	};
-
 protected:
-	WebServer *webserver = nullptr;
-
+	virtual void onConnect() {}
 private:
-	WifiMonitor wifi_monitor;
+	void acessPoint();
+
+	uint8_t disconnect_count = 4;
 
 #if defined(ESP8266)
 	WiFiEventHandler gotIpEventHandler;
