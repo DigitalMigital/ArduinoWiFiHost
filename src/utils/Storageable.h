@@ -11,17 +11,17 @@
 namespace sergomor
 {
 
-template <typename T, const char *filename>
-class Storageable : public Serializable<T>
+template <typename T>
+class StorageableT : public Serializable<T>
 {
 public:
-	bool load();
-	bool save();
-	bool exists();
+	bool load(const char *);
+	bool save(const char *);
+	bool exists(const char *);
 };
 
-template <typename T, const char *filename>
-bool Storageable<T, filename>::load()
+template <typename T>
+bool StorageableT<T>::load(const char *filename)
 {
 	bool res;
 	SPIFFS.begin();
@@ -38,8 +38,8 @@ bool Storageable<T, filename>::load()
 	return res;
 }
 
-template <typename T, const char *filename>
-bool Storageable<T, filename>::save()
+template <typename T>
+bool StorageableT<T>::save(const char *filename)
 {
 	bool res;
 	SPIFFS.begin();
@@ -56,11 +56,20 @@ bool Storageable<T, filename>::save()
 	return res;
 }
 
-template <typename T, const char *filename>
-bool Storageable<T, filename>::exists()
+template <typename T>
+bool StorageableT<T>::exists(const char *filename)
 {
 	return SPIFFS.begin() ? SPIFFS.exists(filename) : false;
 }
+
+template <typename T, const char *filename>
+class Storageable : public StorageableT<T>
+{
+public:
+	bool load() { return StorageableT<T>::load(filename); }
+	bool save() { return StorageableT<T>::save(filename); }
+	bool exists() { return StorageableT<T>::exists(filename); }
+};
 
 }; // namespace sergomor
 #endif

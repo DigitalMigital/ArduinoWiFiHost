@@ -56,6 +56,7 @@ private:
 		{
 			memcpy(buf + pos, &data, sizeof(T));
 			pos += sizeof(T);
+			//debug << "copy data: " << pos << "T: " << data << endl;
 		}
 	}
 	void copyString(const String &);
@@ -88,6 +89,7 @@ private:
 	{
 		memcpy(&data, buf + pos, sizeof(T));
 		pos += sizeof(T);
+		// debug << "copy data: " << pos << "T: " << data << endl;
 	}
 };
 
