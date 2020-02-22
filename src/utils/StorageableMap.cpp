@@ -7,7 +7,7 @@ size_t StorageableMap::length()
     std::map<String, String> data = map();
     size_t size = 0;
     for (auto v = data.begin(); v != data.end(); v++)
-        size += v->first.length() + v->second.length() + 2;
+        size += sizeof(size_t) + v->first.length() + v->second.length() + 2;
     return size;
 }
 
@@ -23,7 +23,7 @@ OStreambuff &StorageableMap::output(OStreambuff &os)
         key = v->first;
         val = v->second;
         os << key << val;
-        debug << "SAVE Key: " << key << " Val: " << val << endl;
+        //debug << "SAVE Key: " << key << " Val: " << val << endl;
     }
     return os;
 }
